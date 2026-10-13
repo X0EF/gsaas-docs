@@ -1,0 +1,16 @@
+baseURL = "https://x0ef.github.io/gsaas-docs/"
+languageCode = "en-us"
+title = "gsaas docs"
+
+[module]
+  [[module.imports]]
+    path = "github.com/alex-shpak/hugo-book"
+
+[params]
+  BookSection = "docs"
+  BookSearch = true
+  BookRepo = "https://github.com/X0EF/gsaas-docs"
+  BookEditPath = "edit/main"
+
+[markup.goldmark.renderer]
+  unsafe = true
