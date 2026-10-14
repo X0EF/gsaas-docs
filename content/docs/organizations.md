@@ -17,16 +17,14 @@ There are four roles, in rank order: `viewer`, `member`, `admin`, `owner`.
 
 ## Permissions
 
-Roles are ranked by `org.RoleRank`. For finer control, a module can define its own `auth.Perm` constants (for example `projects.PermWrite`). Permissions are optional: a role gate is often enough.
+`app/rbac.go` builds the one `auth.Guard` with `auth.NewGuard`. It lists the roles as a ladder, lowest first, and each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`), and a role gate is often enough.
 
-`app/rbac.go` builds the one `auth.Guard`: the role rank plus the policy mapping roles to permissions.
-
-| Role | Permissions |
+| Role | Adds |
 | --- | --- |
-| owner | all permissions |
-| admin | `org:update`, `org:billing`, `org:members:invite`, `org:api_keys`, project write, job read and write |
+| viewer | nothing |
 | member | job read |
-| viewer | none |
+| admin | `org:update`, `org:billing`, `org:members:invite`, `org:api_keys`, `org:webhooks`, project write, job write |
+| owner | all permissions |
 
 `org:delete` is held only by owners.
 
@@ -38,11 +36,11 @@ The guard gives two middlewares. `app/` passes the `*auth.Guard` to each handler
 // That role or higher
 r.With(guard.RequireRole(org.RoleAdmin)).Post("/", h.Create)
 
-// A permission, resolved through the policy in app/rbac.go
+// A permission granted to the role (or a role below it) in app/rbac.go
 r.With(h.guard.RequirePerm(projects.PermWrite)).Post("/", h.Create)
 ```
 
-To add a permission, define an `auth.Perm` constant in your module and add it to roles in `app/rbac.go`.
+To add a permission, define an `auth.Perm` constant in your module and add it to the lowest role that should have it in `app/rbac.go`.
 
 ## Organization routes
 

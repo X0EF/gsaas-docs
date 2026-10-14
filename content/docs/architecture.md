@@ -38,7 +38,7 @@ The Postgres implementation of each store lives in `adapters/postgres/`. Only `a
 
 ## The app package
 
-`app/app.go` builds every component in `New` and mounts routes in `router`. `app/subscribe.go` registers event handlers, and `app/rbac.go` builds the `auth.Guard` that maps roles to permissions. Nothing is wired anywhere else.
+`app/app.go` builds every component in `New` and mounts routes in `router`. `app/subscribe.go` registers event handlers, and `app/rbac.go` builds the `auth.Guard`: the role ladder and the permissions each role adds. Nothing is wired anywhere else.
 
 ## Events
 
