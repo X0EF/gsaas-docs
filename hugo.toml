@@ -1,5 +1,5 @@
 baseURL = "https://x0ef.github.io/gsaas-docs/"
-languageCode = "en-us"
+locale = "en-us"
 title = "gsaas docs"
 
 [module]
@@ -7,6 +7,7 @@ title = "gsaas docs"
     path = "github.com/alex-shpak/hugo-book"
 
 [params]
+  BookTheme = "auto"
   BookSection = "docs"
   BookSearch = true
   BookRepo = "https://github.com/X0EF/gsaas-docs"
