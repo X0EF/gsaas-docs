@@ -17,7 +17,7 @@ There are four roles, in rank order: `viewer`, `member`, `admin`, `owner`.
 
 ## Permissions
 
-`app/rbac.go` builds the one `auth.Guard` with `auth.NewGuard`. It lists the roles as a ladder, lowest first, and each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`), and a role gate is often enough.
+`org.Roles` is the one role order, lowest first. `app/rbac.go` lists the permissions each role adds and builds the one `auth.Guard` from that order, so each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`), and a role gate is often enough.
 
 | Role | Adds |
 | --- | --- |
