@@ -9,7 +9,7 @@ Code: `billing/`, `adapters/stripe/`, `adapters/postgres/billing.go`
 
 Each organization has its own Stripe customer and subscription. Users start checkout from your app, Stripe sends the result to a webhook, and gsaas keeps the organization's subscription in your database in sync.
 
-## 1. Keys and environment variables
+## Keys and environment variables
 
 Set these in `.env` (all settings are listed in `.env.example`):
 
@@ -24,7 +24,7 @@ Set these in `.env` (all settings are listed in `.env.example`):
 
 Without `STRIPE_SECRET_KEY` the app still boots. Billing routes answer `503` until it is set.
 
-## 2. Plans and prices
+## Plans and prices
 
 1. In Stripe, create a product with a recurring price for your paid plan, and copy its price ID into `STRIPE_PRICE_PRO`.
 2. Optionally create a one-time price for `STRIPE_PRICE_ITEM`.
@@ -34,7 +34,7 @@ To add more plans, extend `billing/plan.go` and the plan lookup in `billing/serv
 
 Gate a paid feature with the `RequirePlan` middleware from the billing handler. Organizations without the plan get `402`.
 
-## 3. The webhook
+## The webhook
 
 **Events to select** in Stripe (these are the ones gsaas handles; others are ignored):
 
@@ -55,7 +55,7 @@ stripe listen --forward-to localhost:5000/webhooks/stripe
 
 Run the worker (`go run ./cmd/worker`) in every environment. Events are processed as background jobs.
 
-## 4. What happens on each event
+## What happens on each event
 
 ```
 Stripe ── POST /webhooks/stripe ──> verify signature
@@ -77,7 +77,7 @@ Stripe ── POST /webhooks/stripe ──> verify signature
 - **What syncs:** the org's subscription status, price, Stripe subscription ID and current period end. One-time purchases are stored as payments.
 - **Deleted orgs:** an event for an organization or customer that no longer exists is marked handled and skipped.
 
-## 5. Checkout and portal
+## Checkout and portal
 
 Owners and admins of an organization call:
 
@@ -86,7 +86,7 @@ Owners and admins of an organization call:
 
 These routes need a signed-in user. API keys can't use them.
 
-## 6. Reacting to changes
+## Reacting to changes
 
 After a subscription change is saved, gsaas publishes the `subscription.changed` event with the org ID and new status. Subscribe to it in `app/subscribe.go` to send emails, unlock features or notify your own systems:
 
