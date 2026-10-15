@@ -5,6 +5,8 @@ weight: -15
 
 # Billing with Stripe
 
+Code: `billing/`, `adapters/stripe/`, `adapters/postgres/billing.go`
+
 Each organization has its own Stripe customer and subscription. Users start checkout from your app, Stripe sends the result to a webhook, and gsaas keeps the organization's subscription in your database in sync.
 
 ## 1. Keys and environment variables

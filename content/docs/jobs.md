@@ -5,6 +5,8 @@ weight: -12
 
 # Background jobs
 
+Code: `jobs/`, `platform/queue/`, `adapters/jobs/`, `cmd/worker/`
+
 Slow, retryable or status-visible work runs as a durable job in a Postgres-backed job queue. `platform/queue` defines the interface.
 
 ## Running the worker
@@ -38,5 +40,23 @@ The routes are scoped to an organization. System jobs, enqueued without an organ
 1. In the owning module, export a job name constant and a method `(ctx, payload []byte) error`.
 2. Enqueue it through the injected `queue.Queue`.
 3. In `RunWorker` in `app/app.go`, map the constant to the method.
+
+The sample project job, enqueued in `projects/service.go`:
+
+```go
+const ApplyJob = "projects.apply"
+
+if _, err := s.queue.Enqueue(ctx, p.OrgID, ApplyJob, body, queue.Opts{MaxAttempts: 3}); err != nil {
+	return Project{}, fmt.Errorf("projects.Create: %w", err)
+}
+```
+
+And mapped in `RunWorker` in `app/app.go`:
+
+```go
+projects.ApplyJob: func(ctx context.Context, payload []byte) error {
+	return a.projects.ApplyPayload(ctx, payload)
+},
+```
 
 In tests, `queue.NewMem` records enqueues.

@@ -5,6 +5,8 @@ weight: -11
 
 # File uploads
 
+Code: `files/`, `adapters/storage/`
+
 Files go straight from the client to S3-compatible storage through presigned URLs, so the API never handles file bytes. One adapter covers AWS S3, Cloudflare R2, Supabase Storage and other S3-compatible services. They differ only in settings.
 
 ## Setup
@@ -22,4 +24,19 @@ The routes need a signed-in user.
 | `GET /files/download?key=...` | Get a presigned download URL |
 | `DELETE /files?key=...` | Delete a file |
 
-Each file has a kind. The built-in kind is `avatar`. Add kinds in `files/kind.go`.
+Each file has a kind. The built-in kind is `avatar`. Add kinds in `files/kind.go`, as a constant and a case in `ParseKind`:
+
+```go
+const (
+	KindAvatar Kind = "avatar"
+)
+
+func ParseKind(s string) (Kind, error) {
+	switch Kind(strings.TrimSpace(s)) {
+	case KindAvatar:
+		return Kind(strings.TrimSpace(s)), nil
+	default:
+		return "", ErrInvalidKind
+	}
+}
+```

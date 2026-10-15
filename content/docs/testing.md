@@ -5,6 +5,8 @@ weight: -9
 
 # Testing
 
+Code: `*_test.go` next to each package; tenant isolation in `app/isolation_test.go`
+
 `make check` is the definition of done. It runs:
 
 1. `gofmt` (fails if any file needs formatting)

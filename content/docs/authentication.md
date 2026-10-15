@@ -5,6 +5,8 @@ weight: -17
 
 # Authentication
 
+Code: `platform/auth/`, `identity/`, `adapters/supabase/`, API keys in `organization/apikey.go`
+
 Clients send `Authorization: Bearer <token>` on each request. The token is either a session token or an organization API key. Use one auth mode: local (the default) or Supabase.
 
 ## Local auth (default)

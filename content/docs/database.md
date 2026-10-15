@@ -5,6 +5,8 @@ weight: -10
 
 # Database & migrations
 
+Code: `database/` (migrations, queries, generated sqlc), `adapters/postgres/`, `cmd/migrate/`
+
 gsaas uses Postgres. Migrations run with goose and queries compile to Go with sqlc. Local Postgres runs in Docker Compose.
 
 ## Make targets

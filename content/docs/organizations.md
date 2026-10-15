@@ -5,6 +5,8 @@ weight: -16
 
 # Organizations & multi-tenancy
 
+Code: `organization/`, `platform/auth/`, `app/rbac.go`
+
 Every user gets a personal organization they own, created at sign-up, first Supabase sign-in, or invite acceptance. Users can also create team organizations and invite members. Data in tenant modules such as projects, jobs, billing and webhooks belongs to one organization.
 
 ## Choosing the organization
@@ -43,6 +45,14 @@ r.With(h.guard.RequirePerm(projects.PermWrite)).Post("/", h.Create)
 ```
 
 To add a permission, define an `auth.Perm` constant in your module and add it to the lowest role that should have it in `app/rbac.go`.
+
+```go
+// projects/handler.go
+const PermWrite auth.Perm = "projects:write"
+
+// app/rbac.go
+org.RoleAdmin: {org.PermOrgUpdate, org.PermOrgBilling, org.PermOrgMembersInvite, org.PermOrgAPIKeys, org.PermOrgWebhooks, projects.PermWrite, jobs.PermWrite},
+```
 
 ## Organization routes
 

@@ -5,6 +5,8 @@ weight: -19
 
 # Configuration
 
+Code: `platform/config/config.go`, `.env.example`
+
 All settings come from environment variables, read in `platform/config/config.go`. Copy `.env.example` to `.env` to start. Every setting has a default, so the server boots with only `DATABASE_URL` set.
 
 | Area | Variables |

@@ -5,6 +5,8 @@ weight: -20
 
 # Quickstart
 
+Code: `Makefile`, `cmd/`, `docker-compose.yaml`
+
 Requirements: Go 1.26, Docker, and sqlc v1.30.0 (only to regenerate queries).
 
 ```bash

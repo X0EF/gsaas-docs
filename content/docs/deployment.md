@@ -5,6 +5,8 @@ weight: -8
 
 # Deployment
 
+Code: `Dockerfile`, `cmd/server/`, `cmd/worker/`
+
 The repository has a multi-stage `Dockerfile`. It builds the API server as a static binary and runs it on a distroless, non-root image, listening on port 5000.
 
 ```bash

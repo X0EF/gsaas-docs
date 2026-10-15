@@ -5,6 +5,8 @@ weight: -7
 
 # API reference
 
+Code: `app/openapi.yaml`, `app/openapi.go`, routes in `app/app.go`
+
 The running API serves its full reference:
 
 - `GET /docs`: interactive reference (Scalar), e.g. `http://localhost:5000/docs`
@@ -17,13 +19,14 @@ Route groups at a glance:
 | `/healthz`, `/readyz` | none | [Deployment]({{< relref "deployment" >}}) |
 | `/auth` | none, rate limited | [Authentication]({{< relref "authentication" >}}) |
 | `/invites/accept` | none, rate limited | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
-| `/me`, `/users` | session | [Authentication]({{< relref "authentication" >}}) |
-| `/files` | session | [File uploads]({{< relref "files" >}}) |
-| `/organizations` | session or API key | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
-| `/organizations/{orgID}/billing` | session | [Billing]({{< relref "billing" >}}) |
-| `/organizations/{orgID}/webhooks` | session or API key | [Webhooks]({{< relref "webhooks" >}}) |
-| `/projects` | session or API key, tenant | [Project structure]({{< relref "architecture" >}}) |
-| `/jobs` | session or API key, tenant | [Background jobs]({{< relref "jobs" >}}) |
+| `/me`, `/users` | user | [Authentication]({{< relref "authentication" >}}) |
+| `/files` | user | [File uploads]({{< relref "files" >}}) |
+| `POST /organizations` | user | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
+| `/organizations/{orgID}` | user or API key, tenant | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
+| `/organizations/{orgID}/billing` | user | [Billing]({{< relref "billing" >}}) |
+| `/organizations/{orgID}/webhooks` | user or API key | [Webhooks]({{< relref "webhooks" >}}) |
+| `/projects` | user or API key, tenant | [Project structure]({{< relref "architecture" >}}) |
+| `/jobs` | user or API key, tenant | [Background jobs]({{< relref "jobs" >}}) |
 | `/webhooks/stripe` | Stripe signature | [Billing]({{< relref "billing" >}}) |
 
 ## Conventions

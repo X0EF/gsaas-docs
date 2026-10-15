@@ -5,6 +5,8 @@ weight: -14
 
 # Outbound webhooks
 
+Code: `webhooks/`, `adapters/postgres/webhooks.go`, `app/subscribe.go`
+
 Your customers can get notified when something happens in their organization, without polling your API. A customer's Zapier flow or backend can learn the moment a project is created, for example.
 
 ## The flow
@@ -79,5 +81,13 @@ ok := hmac.Equal([]byte("v1="+hex.EncodeToString(mac.Sum(nil))), []byte(sig))
 
 1. Publish the event on the bus from your domain, with snake_case `json` tags on the payload struct.
 2. Add it to `webhookEvents` in `app/subscribe.go`, with a function that returns the payload's organization ID.
+
+```go
+// app/subscribe.go
+projects.EventCreated: func(p any) (uuid.UUID, bool) {
+	e, ok := p.(projects.Created)
+	return e.OrgID, ok
+},
+```
 
 Delivery, signing and retries are shared.
