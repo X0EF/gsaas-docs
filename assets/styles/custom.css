@@ -43,3 +43,12 @@ code, kbd, samp, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
   border: 1px solid #33302d;
   border-radius: 4px;
 }
+
+.markdown pre .copy-btn {
+  position: absolute; top: .5rem; right: .5rem;
+  font: .75rem "JetBrains Mono", ui-monospace, monospace;
+  background: #292524; color: #a8a29e; border: 1px solid #33302d;
+  border-radius: 4px; padding: .2rem .5rem; cursor: pointer; opacity: .7;
+}
+.markdown pre:hover .copy-btn { opacity: 1; }
+.markdown pre .copy-btn:hover { color: #e7e5e4; }
