@@ -16,10 +16,10 @@ Route groups at a glance:
 | --- | --- | --- |
 | `/healthz`, `/readyz` | none | [Deployment]({{< relref "deployment" >}}) |
 | `/auth` | none, rate limited | [Authentication]({{< relref "authentication" >}}) |
-| `/invites/accept` | none, rate limited | [Organizations & roles]({{< relref "organizations" >}}) |
+| `/invites/accept` | none, rate limited | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
 | `/me`, `/users` | session | [Authentication]({{< relref "authentication" >}}) |
 | `/files` | session | [File uploads]({{< relref "files" >}}) |
-| `/organizations` | session or API key | [Organizations & roles]({{< relref "organizations" >}}) |
+| `/organizations` | session or API key | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
 | `/organizations/{orgID}/billing` | session | [Billing]({{< relref "billing" >}}) |
 | `/organizations/{orgID}/webhooks` | session or API key | [Webhooks]({{< relref "webhooks" >}}) |
 | `/projects` | session or API key, tenant | [Project structure]({{< relref "architecture" >}}) |

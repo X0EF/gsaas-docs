@@ -1,9 +1,9 @@
 ---
-title: Organizations & roles
+title: Organizations & multi-tenancy
 weight: -16
 ---
 
-# Organizations & roles
+# Organizations & multi-tenancy
 
 Every user gets a personal organization they own, created at sign-up, first Supabase sign-in, or invite acceptance. Users can also create team organizations and invite members. Data in tenant modules such as projects, jobs, billing and webhooks belongs to one organization.
 
@@ -13,11 +13,11 @@ Routes with `{orgID}` in the path use that organization. Other tenant routes, su
 
 ## Roles
 
-There are four roles, in rank order: `viewer`, `member`, `admin`, `owner`.
+There are four roles. `org.Roles` lists them lowest first: `viewer`, `member`, `admin`, `owner`.
 
 ## Permissions
 
-`org.Roles` is the one role order, lowest first. `app/rbac.go` lists the permissions each role adds and builds the one `auth.Guard` from that order, so each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`), and a role gate is often enough.
+`app/rbac.go` builds the one guard with `auth.NewGuard(org.Roles, grants)`. `grants` lists the permissions each role adds, and each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`).
 
 | Role | Adds |
 | --- | --- |
@@ -26,17 +26,19 @@ There are four roles, in rank order: `viewer`, `member`, `admin`, `owner`.
 | admin | `org:update`, `org:billing`, `org:members:invite`, `org:api_keys`, `org:webhooks`, project write, job write |
 | owner | all permissions |
 
-`org:delete` is held only by owners.
+Only owners have `org:delete`, through all permissions.
 
 ## Gating routes
 
-The guard gives two middlewares. `app/` passes the `*auth.Guard` to each handler that needs it.
+The `tenant` middleware resolves the org (`{orgID}` path, else `X-Org-ID`), checks the caller is a member and sets their role. An API key belongs to one org and keeps its own role.
+
+The guard gives two middlewares. Use `RequireRole` for most routes; reach for `RequirePerm` only when you need finer control than the role ladder. In `app.go` you use `guard` directly. Inside a module, `NewHandler(s, guard)` stores it on the handler as `h.guard`.
 
 ```go
-// That role or higher
+// app.go: that role or higher
 r.With(guard.RequireRole(org.RoleAdmin)).Post("/", h.Create)
 
-// A permission granted to the role (or a role below it) in app/rbac.go
+// Module handler: a permission granted to the role (or a role below it) in app/rbac.go
 r.With(h.guard.RequirePerm(projects.PermWrite)).Post("/", h.Create)
 ```
 
