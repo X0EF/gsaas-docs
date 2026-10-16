@@ -24,6 +24,8 @@ The routes need a signed-in user.
 | `GET /files/download?key=...` | Get a presigned download URL |
 | `DELETE /files?key=...` | Delete a file |
 
+`POST /files/uploads` takes `kind`, `content_type` and `size` (bytes). Sizes above `UPLOAD_MAX_BYTES` (default 10485760, 10 MiB) are rejected with a 400, and the presigned URL only accepts a body of exactly that size.
+
 Each file has a kind. The built-in kind is `avatar`. Add kinds in `files/kind.go`, as a constant and a case in `ParseKind`:
 
 ```go
