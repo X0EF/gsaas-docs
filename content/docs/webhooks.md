@@ -34,7 +34,7 @@ Roles with the `org:webhooks` permission (admins and owners, and API keys grante
 | `GET` | `/organizations/{orgID}/webhooks` | Paginated list (`starting_after`, `has_more`). Secrets aren't included. |
 | `DELETE` | `/organizations/{orgID}/webhooks/{id}` | Stops deliveries to that endpoint. |
 
-URLs must be `https`. An organization can have up to 20 endpoints.
+URLs must be `https`. An organization can have up to 20 endpoints (`WEBHOOK_MAX_ENDPOINTS`).
 
 Events available out of the box: `project.created`, `org.member.added`.
 

@@ -32,7 +32,7 @@ The `identity` module issues and verifies session JWTs signed with `JWT_SECRET`.
 | `POST /auth/signout` | End the session |
 | `PUT /me/password` | Set an optional password |
 
-Magic links are the default sign-in and expire after `MAGIC_LINK_TTL`. `/auth` routes are rate limited (`AUTH_RATE_LIMIT`).
+Magic links are the default sign-in and expire after `MAGIC_LINK_TTL`. Each address gets at most `MAGIC_LINK_HOURLY_LIMIT` links per hour; extra requests still return 202 but send no email. `/auth` routes are rate limited (`AUTH_RATE_LIMIT`).
 
 ## Supabase auth
 
