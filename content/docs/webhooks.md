@@ -26,7 +26,7 @@ The HTTP call never runs inside your API request, so a slow customer server can'
 
 ## Endpoints
 
-Roles with the `org:webhooks` permission (admins and owners, including admin API keys) manage endpoints:
+Roles with the `org:webhooks` permission (admins and owners, and API keys granted `org:webhooks`) manage endpoints:
 
 | Method | Path | |
 | --- | --- | --- |

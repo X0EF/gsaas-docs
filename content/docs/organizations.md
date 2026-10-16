@@ -7,52 +7,55 @@ weight: -16
 
 Code: `organization/`, `platform/auth/`, `app/rbac.go`
 
-Every user gets a personal organization they own, created at sign-up, first Supabase sign-in, or invite acceptance. Users can also create team organizations and invite members. Data in tenant modules such as projects, jobs, billing and webhooks belongs to one organization.
+An organization (org) is a tenant: an account whose data is kept separate from every other org. Every user gets a **personal org** they alone own; they can also create **team orgs** and invite others. Each member has a role, and the role decides what they can do.
 
-## Choosing the organization
+## Who can do what
 
-Routes with `{orgID}` in the path use that organization. Other tenant routes, such as `/projects` and `/jobs`, read the `X-Org-ID` header. The tenant middleware checks membership, so a user who isn't a member gets 403. Isolation is enforced in app code and covered by `app/isolation_test.go`.
+| Action | viewer | member | admin | owner |
+| --- | --- | --- | --- | --- |
+| Read the org, list and read projects | ✓ | ✓ | ✓ | ✓ |
+| List and read jobs | ✗ | ✓ | ✓ | ✓ |
+| Cancel jobs | ✗ | ✗ | ✓ | ✓ |
+| Create, update and delete projects | ✗ | ✗ | ✓ | ✓ |
+| Update the org | ✗ | ✗ | ✓ | ✓ |
+| Manage billing | ✗ | ✗ | ✓ | ✓ |
+| Invite members, list and revoke invites | ✗ | ✗ | ✓ | ✓ |
+| Manage API keys | ✗ | ✗ | ✓ | ✓ |
+| Manage webhooks | ✗ | ✗ | ✓ | ✓ |
+| Delete the org | ✗ | ✗ | ✗ | ✓ |
 
-## Roles
+Billing, deleting the org, invites and API keys also need a signed-in user; an API key (a secret token for server-to-server calls) can't use them.
 
-There are four roles. `org.Roles` lists them lowest first: `viewer`, `member`, `admin`, `owner`.
+## Protecting a route
 
-## Permissions
-
-`app/rbac.go` builds the one guard with `auth.NewGuard(org.Roles, grants)`. `grants` lists the permissions each role adds, and each role inherits every permission of the roles below it. Permissions are optional `auth.Perm` constants that each module defines (for example `projects.PermWrite`).
-
-| Role | Adds |
-| --- | --- |
-| viewer | nothing |
-| member | job read |
-| admin | `org:update`, `org:billing`, `org:members:invite`, `org:api_keys`, `org:webhooks`, project write, job write |
-| owner | all permissions |
-
-Only owners have `org:delete`, through all permissions.
-
-## Gating routes
-
-The `tenant` middleware resolves the org (`{orgID}` path, else `X-Org-ID`), checks the caller is a member and sets their role. An API key belongs to one org and keeps its own role.
-
-The guard gives two middlewares. Use `RequireRole` for most routes; reach for `RequirePerm` only when you need finer control than the role ladder. In `app.go` you use `guard` directly. Inside a module, `NewHandler(s, guard)` stores it on the handler as `h.guard`.
+Put a guard (middleware that returns 403 when the caller lacks the permission) in front of the route. Inside a module, `NewHandler(s, guard)` stores it on the handler as `h.guard`; in `app.go` you use `guard` directly.
 
 ```go
-// app.go: that role or higher
-r.With(guard.RequireRole(org.RoleAdmin)).Post("/", h.Create)
-
-// Module handler: a permission granted to the role (or a role below it) in app/rbac.go
+// Module handler: callers holding the permission
 r.With(h.guard.RequirePerm(projects.PermWrite)).Post("/", h.Create)
+
+// Your own route, signed-in admins and owners only (illustrative)
+r.With(guard.RequireRole(org.RoleAdmin)).Post("/", h.Create)
 ```
 
 To add a permission, define an `auth.Perm` constant in your module and add it to the lowest role that should have it in `app/rbac.go`.
 
-```go
-// projects/handler.go
-const PermWrite auth.Perm = "projects:write"
+## Choosing the organization
 
-// app/rbac.go
-org.RoleAdmin: {org.PermOrgUpdate, org.PermOrgBilling, org.PermOrgMembersInvite, org.PermOrgAPIKeys, org.PermOrgWebhooks, projects.PermWrite, jobs.PermWrite},
-```
+Every user gets a personal org, created at sign-up, first Supabase sign-in, or invite acceptance. Data in tenant modules such as projects, jobs, billing and webhooks belongs to one org.
+
+Routes with `{orgID}` in the path use that org. Other tenant routes, such as `/projects` and `/jobs`, read the `X-Org-ID` header. The tenant middleware checks membership, so a user who isn't a member gets 403. Isolation is enforced in app code and covered by `app/isolation_test.go`.
+
+## Tenant middleware
+
+The `tenant` middleware resolves the org (`{orgID}` path, else `X-Org-ID`), checks the caller is a member and sets their role. An API key belongs to one org and keeps its own perms; with no org named it uses its own org, and naming another org gets 403.
+
+## RequirePerm vs RequireRole
+
+- `RequirePerm(p)` allows callers holding `p`: members whose role is granted it in `app/rbac.go`, or API keys created with it. Built-in routes use it.
+- `RequireRole(min)` allows signed-in members ranked at or above `min` in `org.Roles`. It's a session-only shortcut for your own routes; API keys have no role, so they get 403.
+
+Both return 401 when there is no caller and 403 when the caller lacks the permission.
 
 ## Organization routes
 

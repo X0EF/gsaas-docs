@@ -1,39 +1,45 @@
 ---
-title: Background jobs
+title: Jobs
 weight: -12
 ---
 
-# Background jobs
+# Jobs
 
 Code: `jobs/`, `platform/queue/`, `adapters/jobs/`, `cmd/worker/`
 
-Slow, retryable or status-visible work runs as a durable job in a Postgres-backed job queue. `platform/queue` defines the interface.
+Jobs run slow or retryable work outside the request, in a separate worker process. They are stored in Postgres, so they survive restarts and need no Redis.
+
+**What you get**
+
+- **Safe enqueue.** A job enqueued inside a database transaction exists only if the transaction commits.
+- **Retries.** A failed job is retried with growing delays. Return `queue.ErrPermanent` to stop retrying.
+- **No duplicates.** A job with the same name, organization and idempotency key isn't queued twice.
+- **Jobs API.** List, inspect and cancel your organization's jobs over HTTP.
+- **Test queue.** `queue.NewMem` records jobs in memory, so tests need no worker.
 
 ## Running the worker
 
 ```bash
+make migrate
 go run ./cmd/worker
 ```
 
-The worker runs alongside the API server. `make migrate` creates the queue tables.
+`make migrate` creates the queue tables. The worker runs alongside the API server, in its own process.
 
-## Behavior
+> [!WARNING]
+> The worker must be running, or the [built-in jobs](#built-in-jobs) never run.
 
-- Jobs enqueued inside a database transaction exist only if it commits.
-- A handler that returns an error is retried. Wrap `queue.ErrPermanent` to stop retries.
-- Handlers must honor `ctx` and be idempotent.
+## Built-in jobs
 
-Built-in jobs include `billing.process_webhook`, `billing.cancel_subscription`, `identity.expire_sessions`, `webhooks.deliver` and the sample `projects.apply`.
+| Job | What it does | When it runs | Without the worker |
+| --- | --- | --- | --- |
+| `billing.process_webhook` | Applies a stored Stripe webhook event | When a Stripe webhook arrives | Subscriptions and plans don't update |
+| `billing.cancel_subscription` | Cancels the subscription with the provider | When an organization with a subscription is deleted | The subscription keeps running at the provider |
+| `webhooks.deliver` | Sends one event to one customer endpoint | When a subscribed event is published | Outbound webhooks are never delivered |
+| `identity.expire_sessions` | Removes expired refresh tokens and invites | Every 15 minutes, and when the worker starts | Expired tokens and invites pile up |
+| `projects.apply` | Sample job | When a project is created | The sample job never runs |
 
-## Jobs API
-
-| Route | Permission |
-| --- | --- |
-| `GET /jobs` | job read |
-| `GET /jobs/{id}` | job read |
-| `POST /jobs/{id}/cancel` | job write |
-
-The routes are scoped to an organization. System jobs, enqueued without an organization, aren't listed.
+Emails don't use the job queue. Event handlers send them directly.
 
 ## Adding a job
 
@@ -59,4 +65,38 @@ projects.ApplyJob: func(ctx context.Context, payload []byte) error {
 },
 ```
 
-In tests, `queue.NewMem` records enqueues.
+A job with no mapped handler is canceled, not retried.
+
+## Behavior
+
+- **Transactional enqueue.** Jobs enqueued inside a database transaction exist only if it commits, so a job never runs for a write that was rolled back. `billing` uses this to store a webhook event and its job together.
+- **Payload.** The payload is raw bytes. Built-in jobs encode it as JSON or a plain ID string.
+- **Organization.** The org argument to `Enqueue` decides which organization's jobs API shows the job. A job enqueued with `uuid.Nil` is a system job and isn't listed. `billing.process_webhook` and `identity.expire_sessions` are system jobs.
+- **Retries.** A handler that returns an error is retried. The default is 25 attempts, unless `queue.Opts{MaxAttempts: ...}` sets fewer. The delay grows with each attempt (about attempt⁴ seconds, plus some randomness).
+- **Failed jobs.** After the last attempt the job's status becomes `failed`. Its last error is in the `error` field of `GET /jobs/{id}`.
+- **Permanent errors.** Wrap `queue.ErrPermanent` to stop retries, for input that will never succeed. The job ends as `canceled`, not `failed`.
+
+```go
+return fmt.Errorf("bad payload: %w", queue.ErrPermanent)
+```
+
+- **Honor `ctx`.** Stop work and return when `ctx` is canceled. That happens on cancel, on shutdown, and after the per-job timeout of 1 minute. On shutdown, running jobs get 10 seconds to finish.
+- **Idempotency.** Handlers must be idempotent: running a job twice must have the same effect as once, because a retry can repeat work. `queue.Opts{IdempotencyKey: ...}` also prevents enqueuing the same job twice; `webhooks.deliver` uses one per event and endpoint.
+
+## Jobs API
+
+| Route | Permission |
+| --- | --- |
+| `GET /jobs` | `jobs:read` (member and up) |
+| `GET /jobs/{id}` | `jobs:read` (member and up) |
+| `POST /jobs/{id}/cancel` | `jobs:write` (admin and up) |
+
+The routes are scoped to an organization. System jobs, enqueued without an organization, aren't listed.
+
+A job's `status` is one of `queued`, `running`, `succeeded`, `failed` or `canceled`. Waiting and retrying jobs show as `queued`.
+
+Canceling a queued job stops it at once. Canceling a running job cancels its `ctx`; the response is `202` and may still show `running` until the handler returns.
+
+## Testing
+
+In tests, `queue.NewMem` records enqueues instead of running them, so you can assert a job was queued without a worker.

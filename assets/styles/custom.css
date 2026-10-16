@@ -52,3 +52,9 @@ code, kbd, samp, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
 }
 .markdown pre:hover .copy-btn { opacity: 1; }
 .markdown pre .copy-btn:hover { color: #e7e5e4; }
+
+a[href]:hover, a[role=button]:hover { opacity: 1; color: #9c3a08; font-weight: 500; text-shadow: 0 0 .4px currentColor; }
+:root[data-theme="dark"] a[href]:hover { color: #ff8a3d; }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] a[href]:hover { color: #ff8a3d; }
+}

@@ -25,8 +25,8 @@ Route groups at a glance:
 | `/organizations/{orgID}` | user or API key, tenant | [Organizations & multi-tenancy]({{< relref "organizations" >}}) |
 | `/organizations/{orgID}/billing` | user | [Billing]({{< relref "billing" >}}) |
 | `/organizations/{orgID}/webhooks` | user or API key | [Webhooks]({{< relref "webhooks" >}}) |
-| `/projects` | user or API key, tenant | [Project structure]({{< relref "architecture" >}}) |
-| `/jobs` | user or API key, tenant | [Background jobs]({{< relref "jobs" >}}) |
+| `/projects` | user or API key, tenant | [Project structure]({{< relref "project-structure" >}}) |
+| `/jobs` | user or API key, tenant | [Jobs]({{< relref "jobs" >}}) |
 | `/webhooks/stripe` | Stripe signature | [Billing]({{< relref "billing" >}}) |
 
 ## Conventions

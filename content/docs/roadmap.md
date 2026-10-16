@@ -5,13 +5,14 @@ weight: 4
 
 # Roadmap
 
-Plans can change. Items aren't promised dates.
+What's planned for gsaas next. Plans can change, and items aren't promised dates.
+
+**Getting updates:** new releases are pulled from the private repository with git.
 
 ## Coming soon
 
 - **Metrics:** a Prometheus `/metrics` endpoint, Stripe webhook metrics, and optional OpenTelemetry tracing.
 - **OAuth sign-in** with Google and GitHub.
-- **API key scopes:** keys limited to a subset of permissions.
 - **Security:** lockout after repeated failed passwords, an audit log of sign-ins and role and subscription changes, and structured validation errors.
 - **Email from background jobs**, so a mail outage never fails a request.
 - **Analytics:** request IDs on tracked events, and an HTTP analytics sink.
