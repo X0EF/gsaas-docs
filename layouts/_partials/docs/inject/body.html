@@ -18,7 +18,11 @@ document.querySelectorAll(".markdown pre").forEach(function (pre) {
       setTimeout(function () { b.textContent = "Copy"; }, 1500);
     });
   };
-  pre.style.position = "relative";
-  pre.appendChild(b);
+  // Pin the button to a non-scrolling wrapper; the pre itself scrolls horizontally.
+  var wrap = document.createElement("div");
+  wrap.className = "code-wrap";
+  pre.parentNode.insertBefore(wrap, pre);
+  wrap.appendChild(pre);
+  wrap.appendChild(b);
 });
 </script>

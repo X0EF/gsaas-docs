@@ -44,14 +44,15 @@ code, kbd, samp, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
   border-radius: 4px;
 }
 
-.markdown pre .copy-btn {
+.markdown .code-wrap { position: relative; }
+.markdown .code-wrap .copy-btn {
   position: absolute; top: .5rem; right: .5rem;
   font: .75rem "JetBrains Mono", ui-monospace, monospace;
   background: #292524; color: #a8a29e; border: 1px solid #33302d;
   border-radius: 4px; padding: .2rem .5rem; cursor: pointer; opacity: .7;
 }
-.markdown pre:hover .copy-btn { opacity: 1; }
-.markdown pre .copy-btn:hover { color: #e7e5e4; }
+.markdown .code-wrap:hover .copy-btn { opacity: 1; }
+.markdown .code-wrap .copy-btn:hover { color: #e7e5e4; }
 
 a[href]:hover, a[role=button]:hover { opacity: 1; color: #9c3a08; font-weight: 500; text-shadow: 0 0 .4px currentColor; }
 :root[data-theme="dark"] a[href]:hover { color: #ff8a3d; }
