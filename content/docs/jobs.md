@@ -67,6 +67,27 @@ projects.ApplyJob: func(ctx context.Context, payload []byte) error {
 
 A job with no mapped handler is canceled, not retried.
 
+## Scheduled jobs
+
+A scheduled job runs when the worker starts, then again at a fixed interval. Schedules live in one list in `app/app.go`, next to the handler map that `RunWorker` uses:
+
+```go
+schedule := []queue.Periodic{
+	{Name: identity.ExpireSessionsJob, Every: 15 * time.Minute},
+}
+```
+
+To add one:
+
+1. Add the job as in [Adding a job](#adding-a-job). You don't need to enqueue it yourself.
+2. Add an entry to the schedule list with the job name and its interval in `Every`.
+
+To change how often a job runs, change its `Every`.
+
+- **Fails fast.** The worker refuses to start if a scheduled job has no mapped handler or no positive interval.
+- **Once per interval.** With several workers running, each scheduled job still runs once per interval, not once per worker. The job queue picks one worker to schedule it.
+- **System job.** Scheduled jobs have no organization and no payload, so the handler works across all organizations.
+
 ## Behavior
 
 - **Transactional enqueue.** Jobs enqueued inside a database transaction exist only if it commits, so a job never runs for a write that was rolled back. `billing` uses this to store a webhook event and its job together.
